@@ -1,34 +1,28 @@
-name: Publish
-
 on:
   push:
-    branches: [ master ]
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
+    branches: [main]
+    paths-ignore:
+      - '*.md'
+permissions:
+  contents: write
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
+    name: Run the action on a test graph and publish
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Logseq Publish
+      - name: Build graph's SPA
         uses: logseq/publish-spa@main
         with:
-          output-directory: www
-          accent-color: indigo
+          graph-directory: test/publish-test-graph
+          theme-mode: dark
+          accent-color: cyan
 
-      - name: Add .nojekyll file
-        run: touch www/.nojekyll
-
-      - name: Deploy to gh-pages
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
+      - name: Add a nojekyll file # to make sure asset paths are correctly identified
+        run: touch $GITHUB_WORKSPACE/www/.nojekyll
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages
           folder: www
-          clean: true
-          clean-exclude: |
-            CNAME
-            .nojekyll
-
